@@ -5,79 +5,195 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Worksheet Plugin Demo</title>
     
-    <!-- Load the plugin -->
-    <script src="../src/core/fallback-generator.js"></script>
-    <script src="../src/integrations/plugin-interface.js"></script>
-    
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .controls { background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .controls > * { margin: 10px 0; }
-        select, input, button { padding: 8px; margin: 5px; }
-        button { background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #005fa3; }
-        #output { border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .demo-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .controls { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            border: 1px solid #dee2e6;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        select, input, button { 
+            padding: 10px; 
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button { 
+            background: #007acc; 
+            color: white; 
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { 
+            background: #005fa3; 
+        }
+        #output { 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            border-radius: 8px; 
+            background: white;
+            min-height: 200px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
-    <h1>🧮 Math Worksheet Generator Demo</h1>
-    
-    <div class="controls">
-        <h3>Generate Worksheet</h3>
-        <div>
-            <label>Level: 
-                <select id="level">
-                    <option value="1">Level 1: Counting to 10</option>
-                    <option value="11" selected>Level 11: Adding Within 10</option>
-                    <option value="15">Level 15: Adding Within 20</option>
-                    <option value="21">Level 21: Addition with Regrouping</option>
-                </select>
-            </label>
+    <div class="demo-container">
+        <h1>🧮 Math Worksheet Generator Demo</h1>
+        <p>Live demo of the math worksheet plugin. Generate worksheets instantly!</p>
+        
+        <div class="controls">
+            <h3>⚙️ Worksheet Settings</h3>
+            
+            <div class="form-row">
+                <label><strong>Level:</strong>
+                    <select id="level">
+                        <option value="1">Level 1: Counting to 10 (PreK)</option>
+                        <option value="3">Level 3: Counting to 20 (Kindergarten)</option>
+                        <option value="9">Level 9: Adding Within 5 (Kindergarten)</option>
+                        <option value="11" selected>Level 11: Adding Within 10 (1st Grade)</option>
+                        <option value="15">Level 15: Adding Within 20 (1st Grade)</option>
+                        <option value="21">Level 21: Addition with Regrouping (2nd Grade)</option>
+                        <option value="26">Level 26: Multiplication 2s (2nd Grade)</option>
+                    </select>
+                </label>
+                
+                <label><strong>Problems:</strong>
+                    <input type="number" id="count" value="10" min="1" max="50">
+                </label>
+            </div>
+            
+            <div class="form-row">
+                <button onclick="generateWorksheet()">🎯 Generate Worksheet</button>
+                <button onclick="downloadPDF()" id="pdfBtn" disabled>📄 Download PDF</button>
+                <button onclick="printWorksheet()" id="printBtn" disabled>🖨️ Print</button>
+            </div>
         </div>
-        <div>
-            <label>Number of Problems: 
-                <input type="number" id="count" value="10" min="1" max="50">
-            </label>
-        </div>
-        <div>
-            <button onclick="generateWorksheet()">Generate Worksheet</button>
-            <button onclick="downloadPDF()">Download as PDF</button>
+        
+        <div id="status"></div>
+        
+        <div id="output">
+            <p style="text-align: center; color: #666; font-style: italic;">
+                👆 Click "Generate Worksheet" to see your math problems!
+            </p>
         </div>
     </div>
-    
-    <div id="output">
-        <p>Click "Generate Worksheet" to see your math problems!</p>
-    </div>
+
+    <!-- Load the plugin files -->
+    <script src="../src/core/fallback-generator.js"></script>
+    <script src="../src/integrations/plugin-interface.js"></script>
 
     <script>
         let currentWorksheet = null;
+        
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 3000);
+        }
         
         function generateWorksheet() {
             const level = parseInt(document.getElementById('level').value);
             const count = parseInt(document.getElementById('count').value);
             
-            // Create generator
-            const generator = createWorksheetGenerator();
+            showStatus('⚡ Generating worksheet...', 'success');
             
-            // Generate worksheet
-            generator.generate(level, count).then(result => {
-                currentWorksheet = result;
-                document.getElementById('output').innerHTML = result.html;
-            });
+            try {
+                // Check if functions are available
+                if (typeof createWorksheetGenerator === 'undefined') {
+                    throw new Error('Plugin not loaded properly');
+                }
+                
+                // Create generator and generate worksheet
+                const generator = createWorksheetGenerator();
+                generator.generate(level, count).then(result => {
+                    currentWorksheet = result;
+                    document.getElementById('output').innerHTML = result.html;
+                    
+                    // Enable PDF and print buttons
+                    document.getElementById('pdfBtn').disabled = false;
+                    document.getElementById('printBtn').disabled = false;
+                    
+                    showStatus(`✅ Generated ${result.worksheet.problems.length} problems for Level ${level}!`, 'success');
+                }).catch(error => {
+                    console.error('Generation error:', error);
+                    showStatus(`❌ Error generating worksheet: ${error.message}`, 'error');
+                });
+                
+            } catch (error) {
+                console.error('Setup error:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
         }
         
         function downloadPDF() {
             if (!currentWorksheet) {
-                alert('Generate a worksheet first!');
+                showStatus('❌ Generate a worksheet first!', 'error');
                 return;
             }
             
-            // For a real implementation, you'd use html2pdf.js here
-            alert('PDF download would happen here!\n\nTo implement:\n1. Include html2pdf.js\n2. Call html2pdf().from(element).save()');
+            // Simple implementation - in a real app you'd use html2pdf.js
+            showStatus('💡 To download PDF: Right-click → Print → Save as PDF', 'success');
         }
         
-        // Generate initial worksheet
-        generateWorksheet();
+        function printWorksheet() {
+            if (!currentWorksheet) {
+                showStatus('❌ Generate a worksheet first!', 'error');
+                return;
+            }
+            
+            window.print();
+        }
+        
+        // Test if plugin loaded correctly
+        window.addEventListener('load', function() {
+            if (typeof generateFallbackProblems !== 'undefined' && typeof createWorksheetGenerator !== 'undefined') {
+                showStatus('🎉 Plugin loaded successfully! Ready to generate worksheets.', 'success');
+                // Generate initial worksheet
+                setTimeout(generateWorksheet, 1000);
+            } else {
+                showStatus('❌ Plugin failed to load. Check file paths.', 'error');
+            }
+        });
     </script>
 </body>
 </html>
