@@ -1,225 +1,337 @@
-/**
- * Main Plugin Interface for Easy Integration
- * COMPLETE VERSION - Supports all 32 levels
- */
-
-// Import fallback generator (works in both environments)
-let generateFallbackProblems, getSkillIdFromLevel;
-
-if (typeof require !== 'undefined') {
-  // Node.js environment
-  ({ generateFallbackProblems, getSkillIdFromLevel } = require('../core/fallback-generator.js'));
-} else {
-  // Browser environment - functions should be on window
-  generateFallbackProblems = window.generateFallbackProblems;
-  getSkillIdFromLevel = window.getSkillIdFromLevel;
-}
-
-class MathWorksheetPlugin {
-  constructor(options = {}) {
-    this.config = {
-      enableAI: false,
-      defaultLevel: 11,
-      maxProblems: 50,
-      ...options
-    };
-  }
-
-  async generateWorksheet(request) {
-    const level = request.level || this.config.defaultLevel;
-    const count = request.count || this.getDefaultCount(level);
-    const skillId = getSkillIdFromLevel(level);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Worksheet Plugin Demo - All 32 Levels</title>
     
-    const { problems, answers } = generateFallbackProblems(skillId, count);
-    
-    return {
-      problems,
-      answers,
-      metadata: {
-        level,
-        skillName: this.getSkillName(level),
-        tier: 1,
-        generationTime: 50,
-        problemCount: problems.length
-      }
-    };
-  }
-
-  generateHTML(worksheetData) {
-    const { problems, answers, metadata } = worksheetData;
-    const config = this.getLayoutConfig(metadata.level);
-    
-    const problemsHTML = problems.map((problem, index) => `
-      <div class="problem">
-        <span class="problem-number">${index + 1}.</span>
-        <span class="problem-text">${problem.replace(/\n/g, '<br>')}</span>
-      </div>
-    `).join('');
-
-    return `
-      <div class="worksheet" style="
-        font-family: Arial, sans-serif;
-        max-width: 8.5in;
-        margin: 0 auto;
-        padding: 40px;
-        background: white;
-      ">
-        <div class="header" style="
-          text-align: center;
-          margin-bottom: 30px;
-          border-bottom: 2px solid #333;
-          padding-bottom: 15px;
-        ">
-          <h1 style="font-size: 24px; margin-bottom: 5px;">${metadata.skillName}</h1>
-          <div style="display: flex; justify-content: space-between; font-size: 14px; color: #666;">
-            <span>Name: ___________________</span>
-            <span>Level ${metadata.level}</span>
-            <span>Date: ___________________</span>
-          </div>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .demo-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .controls { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            border: 1px solid #dee2e6;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        select, input, button { 
+            padding: 10px; 
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        select {
+            min-width: 300px;
+        }
+        button { 
+            background: #007acc; 
+            color: white; 
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { 
+            background: #005fa3; 
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #output { 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            border-radius: 8px; 
+            background: white;
+            min-height: 200px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .level-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2196f3;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🧮 Math Worksheet Generator Demo</h1>
+        <p>Complete demo with all 32 Kumon-style levels from PreK to 3rd Grade!</p>
+        
+        <div class="level-info">
+            <strong>📚 Current Level:</strong> <span id="levelInfo">Select a level to see details</span>
+            <div class="stats">
+                <span>🎯 <strong>Grade:</strong> <span id="gradeInfo">-</span></span>
+                <span>👶 <strong>Age:</strong> <span id="ageInfo">-</span></span>
+                <span>📊 <strong>Default Problems:</strong> <span id="problemInfo">-</span></span>
+            </div>
         </div>
         
-        <div class="problems-grid" style="
-          display: grid;
-          grid-template-columns: repeat(${config.columns}, 1fr);
-          gap: 20px;
-          margin-bottom: 40px;
-        ">
-          ${problemsHTML}
+        <div class="controls">
+            <h3>⚙️ Worksheet Settings</h3>
+            
+            <div class="form-row">
+                <label><strong>Level (1-32):</strong>
+                    <select id="level">
+                        <!-- PreK (Ages 3-4) -->
+                        <optgroup label="👶 PreK (Ages 3-4)">
+                            <option value="1">Level 1: Counting to 10</option>
+                            <option value="2">Level 2: Number Recognition 1-10</option>
+                        </optgroup>
+                        
+                        <!-- Kindergarten (Ages 5-6) -->
+                        <optgroup label="🌱 Kindergarten (Ages 5-6)">
+                            <option value="3">Level 3: Counting to 20</option>
+                            <option value="4">Level 4: Number Recognition 1-20</option>
+                            <option value="5">Level 5: Simple Patterns</option>
+                            <option value="6">Level 6: Basic Shapes</option>
+                            <option value="7">Level 7: Counting to 50</option>
+                            <option value="8">Level 8: Number Recognition 1-50</option>
+                            <option value="9">Level 9: Adding Within 5</option>
+                            <option value="10">Level 10: Subtracting Within 5</option>
+                        </optgroup>
+                        
+                        <!-- 1st Grade (Ages 6-7) -->
+                        <optgroup label="📖 1st Grade (Ages 6-7)">
+                            <option value="11" selected>Level 11: Adding Within 10</option>
+                            <option value="12">Level 12: Subtracting Within 10</option>
+                            <option value="13">Level 13: Counting to 100</option>
+                            <option value="14">Level 14: Number Recognition 1-100</option>
+                            <option value="15">Level 15: Adding Within 20 (No Regrouping)</option>
+                            <option value="16">Level 16: Subtracting Within 20 (No Regrouping)</option>
+                            <option value="17">Level 17: Adding Within 100 (No Regrouping)</option>
+                            <option value="18">Level 18: Subtracting Within 100 (No Regrouping)</option>
+                            <option value="19">Level 19: Skip Counting by 2s</option>
+                            <option value="20">Level 20: Skip Counting by 5s</option>
+                        </optgroup>
+                        
+                        <!-- 2nd Grade (Ages 7-8) -->
+                        <optgroup label="🏫 2nd Grade (Ages 7-8)">
+                            <option value="21">Level 21: Adding Within 20 (With Regrouping)</option>
+                            <option value="22">Level 22: Subtracting Within 20 (With Regrouping)</option>
+                            <option value="23">Level 23: Adding Within 100 (With Regrouping)</option>
+                            <option value="24">Level 24: Subtracting Within 100 (With Regrouping)</option>
+                            <option value="25">Level 25: Skip Counting by 10s</option>
+                            <option value="26">Level 26: Multiplication Tables 2s</option>
+                            <option value="27">Level 27: Multiplication Tables 5s</option>
+                            <option value="28">Level 28: Multiplication Tables 10s</option>
+                        </optgroup>
+                        
+                        <!-- 3rd Grade (Ages 8-9) -->
+                        <optgroup label="🎓 3rd Grade (Ages 8-9)">
+                            <option value="29">Level 29: Adding Within 1000 (No Regrouping)</option>
+                            <option value="30">Level 30: Subtracting Within 1000 (No Regrouping)</option>
+                            <option value="31">Level 31: Adding Within 1000 (With Regrouping)</option>
+                            <option value="32">Level 32: Subtracting Within 1000 (With Regrouping)</option>
+                        </optgroup>
+                    </select>
+                </label>
+            </div>
+            
+            <div class="form-row">
+                <label><strong>Problems:</strong>
+                    <input type="number" id="count" value="10" min="1" max="50">
+                </label>
+                
+                <button onclick="generateWorksheet()">🎯 Generate Worksheet</button>
+                <button onclick="downloadPDF()" id="pdfBtn" disabled>📄 Download PDF</button>
+                <button onclick="printWorksheet()" id="printBtn" disabled>🖨️ Print</button>
+            </div>
         </div>
-      </div>
-      
-      <style>
-        .problem {
-          font-size: ${config.fontSize}px;
-          line-height: 1.6;
-          padding: 15px;
-          border: 1px solid #eee;
-          border-radius: 8px;
-          background: #fafafa;
-          min-height: 60px;
+        
+        <div id="status"></div>
+        
+        <div id="output">
+            <p style="text-align: center; color: #666; font-style: italic;">
+                👆 Select a level and click "Generate Worksheet" to see your math problems!
+            </p>
+        </div>
+    </div>
+
+    <!-- Load the plugin files -->
+    <script src="../src/core/fallback-generator.js"></script>
+    <script src="../src/integrations/plugin-interface.js"></script>
+
+    <script>
+        let currentWorksheet = null;
+        
+        // Complete level information for all 32 levels
+        const LEVEL_INFO = {
+            // PreK (Ages 3-4)
+            1: { grade: "PreK", age: "3-4", problems: 5, description: "Visual counting with objects" },
+            2: { grade: "PreK", age: "3-4", problems: 5, description: "Number identification" },
+            
+            // Kindergarten (Ages 5-6)
+            3: { grade: "Kindergarten", age: "5-6", problems: 6, description: "Extended counting practice" },
+            4: { grade: "Kindergarten", age: "5-6", problems: 6, description: "Number recognition and ordering" },
+            5: { grade: "Kindergarten", age: "5-6", problems: 6, description: "Pattern completion" },
+            6: { grade: "Kindergarten", age: "5-6", problems: 8, description: "Shape identification" },
+            7: { grade: "Kindergarten", age: "5-6", problems: 8, description: "Higher number counting" },
+            8: { grade: "Kindergarten", age: "5-6", problems: 8, description: "Two-digit recognition" },
+            9: { grade: "Kindergarten", age: "5-6", problems: 8, description: "Introduction to addition" },
+            10: { grade: "Kindergarten", age: "5-6", problems: 8, description: "Introduction to subtraction" },
+            
+            // 1st Grade (Ages 6-7)
+            11: { grade: "1st Grade", age: "6-7", problems: 20, description: "Addition fluency building" },
+            12: { grade: "1st Grade", age: "6-7", problems: 20, description: "Subtraction fluency building" },
+            13: { grade: "1st Grade", age: "6-7", problems: 15, description: "Counting patterns to 100" },
+            14: { grade: "1st Grade", age: "6-7", problems: 15, description: "Place value concepts" },
+            15: { grade: "1st Grade", age: "6-7", problems: 20, description: "Two-digit addition basics" },
+            16: { grade: "1st Grade", age: "6-7", problems: 20, description: "Two-digit subtraction basics" },
+            17: { grade: "1st Grade", age: "6-7", problems: 20, description: "Expanded addition practice" },
+            18: { grade: "1st Grade", age: "6-7", problems: 20, description: "Expanded subtraction practice" },
+            19: { grade: "1st Grade", age: "6-7", problems: 15, description: "Even number patterns" },
+            20: { grade: "1st Grade", age: "6-7", problems: 15, description: "Multiplication foundation" },
+            
+            // 2nd Grade (Ages 7-8)
+            21: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Addition with carrying" },
+            22: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Subtraction with borrowing" },
+            23: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Advanced addition with regrouping" },
+            24: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Advanced subtraction with regrouping" },
+            25: { grade: "2nd Grade", age: "7-8", problems: 20, description: "Counting by tens" },
+            26: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Times tables for 2" },
+            27: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Times tables for 5" },
+            28: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Times tables for 10" },
+            
+            // 3rd Grade (Ages 8-9)
+            29: { grade: "3rd Grade", age: "8-9", problems: 20, description: "Three-digit addition basics" },
+            30: { grade: "3rd Grade", age: "8-9", problems: 20, description: "Three-digit subtraction basics" },
+            31: { grade: "3rd Grade", age: "8-9", problems: 25, description: "Complex three-digit addition" },
+            32: { grade: "3rd Grade", age: "8-9", problems: 25, description: "Complex three-digit subtraction" }
+        };
+        
+        function updateLevelInfo() {
+            const level = parseInt(document.getElementById('level').value);
+            const info = LEVEL_INFO[level];
+            
+            if (info) {
+                document.getElementById('levelInfo').textContent = `Level ${level} - ${document.getElementById('level').selectedOptions[0].text.split(': ')[1]}`;
+                document.getElementById('gradeInfo').textContent = info.grade;
+                document.getElementById('ageInfo').textContent = info.age;
+                document.getElementById('problemInfo').textContent = info.problems;
+                
+                // Update problem count to default for this level
+                document.getElementById('count').value = info.problems;
+            }
         }
-        .problem-number {
-          font-weight: bold;
-          margin-right: 8px;
-          color: #007acc;
+        
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 3000);
         }
-        .problem-text {
-          font-family: monospace;
+        
+        function generateWorksheet() {
+            const level = parseInt(document.getElementById('level').value);
+            const count = parseInt(document.getElementById('count').value);
+            
+            showStatus('⚡ Generating worksheet...', 'success');
+            
+            try {
+                if (typeof createWorksheetGenerator === 'undefined') {
+                    throw new Error('Plugin not loaded properly');
+                }
+                
+                const generator = createWorksheetGenerator();
+                generator.generate(level, count).then(result => {
+                    currentWorksheet = result;
+                    document.getElementById('output').innerHTML = result.html;
+                    
+                    // Enable PDF and print buttons
+                    document.getElementById('pdfBtn').disabled = false;
+                    document.getElementById('printBtn').disabled = false;
+                    
+                    const info = LEVEL_INFO[level];
+                    showStatus(`✅ Generated ${result.worksheet.problems.length} problems for Level ${level} (${info.grade})!`, 'success');
+                }).catch(error => {
+                    console.error('Generation error:', error);
+                    showStatus(`❌ Error generating worksheet: ${error.message}`, 'error');
+                });
+                
+            } catch (error) {
+                console.error('Setup error:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
         }
-        @media print {
-          @page { margin: 0.5in; }
-          .worksheet { padding: 20px; }
+        
+        function downloadPDF() {
+            if (!currentWorksheet) {
+                showStatus('❌ Generate a worksheet first!', 'error');
+                return;
+            }
+            
+            showStatus('💡 To download PDF: Right-click → Print → Save as PDF', 'success');
         }
-      </style>
-    `;
-  }
-
-  getSkillName(level) {
-    const skills = {
-      // PreK (Ages 3-4)
-      1: "Counting to 10",
-      2: "Number Recognition 1-10",
-      
-      // Kindergarten (Ages 5-6)
-      3: "Counting to 20",
-      4: "Number Recognition 1-20",
-      5: "Simple Patterns",
-      6: "Basic Shapes",
-      7: "Counting to 50",
-      8: "Number Recognition 1-50",
-      9: "Adding Within 5",
-      10: "Subtracting Within 5",
-      
-      // 1st Grade (Ages 6-7)
-      11: "Adding Within 10",
-      12: "Subtracting Within 10",
-      13: "Counting to 100",
-      14: "Number Recognition 1-100",
-      15: "Adding Within 20 (No Regrouping)",
-      16: "Subtracting Within 20 (No Regrouping)",
-      17: "Adding Within 100 (No Regrouping)",
-      18: "Subtracting Within 100 (No Regrouping)",
-      19: "Skip Counting by 2s",
-      20: "Skip Counting by 5s",
-      
-      // 2nd Grade (Ages 7-8)
-      21: "Adding Within 20 (With Regrouping)",
-      22: "Subtracting Within 20 (With Regrouping)",
-      23: "Adding Within 100 (With Regrouping)",
-      24: "Subtracting Within 100 (With Regrouping)",
-      25: "Skip Counting by 10s",
-      26: "Multiplication Tables 2s",
-      27: "Multiplication Tables 5s",
-      28: "Multiplication Tables 10s",
-      
-      // 3rd Grade (Ages 8-9)
-      29: "Adding Within 1000 (No Regrouping)",
-      30: "Subtracting Within 1000 (No Regrouping)",
-      31: "Adding Within 1000 (With Regrouping)",
-      32: "Subtracting Within 1000 (With Regrouping)"
-    };
-    
-    return skills[level] || `Level ${level} Math`;
-  }
-
-  getDefaultCount(level) {
-    // Age-appropriate problem counts based on level
-    if (level <= 2) return 5;          // PreK: 5 problems
-    if (level <= 10) return 8;         // Kindergarten: 8 problems
-    if (level <= 20) return 20;        // 1st Grade: 20 problems
-    if (level <= 28) return 25;        // 2nd Grade: 25 problems
-    return 25;                         // 3rd Grade: 25 problems
-  }
-
-  getLayoutConfig(level) {
-    // Age-appropriate layouts
-    if (level <= 2) {
-      // PreK: Large fonts, single column
-      return {
-        fontSize: 24,
-        columns: 1
-      };
-    } else if (level <= 10) {
-      // Kindergarten: Medium fonts, 2 columns
-      return {
-        fontSize: 20,
-        columns: 2
-      };
-    } else if (level <= 20) {
-      // 1st Grade: Smaller fonts, 4 columns
-      return {
-        fontSize: 18,
-        columns: 4
-      };
-    } else {
-      // 2nd/3rd Grade: Compact layout, 5 columns
-      return {
-        fontSize: 16,
-        columns: 5
-      };
-    }
-  }
-}
-
-function createWorksheetGenerator(options = {}) {
-  const plugin = new MathWorksheetPlugin(options);
-  
-  return {
-    async generate(level, count) {
-      const worksheet = await plugin.generateWorksheet({ level, count });
-      const html = plugin.generateHTML(worksheet);
-      return { worksheet, html };
-    }
-  };
-}
-
-// Export for Node.js
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { MathWorksheetPlugin, createWorksheetGenerator };
-}
-
-// Export for browser (IMPORTANT!)
-if (typeof window !== 'undefined') {
-  window.MathWorksheetPlugin = MathWorksheetPlugin;
-  window.createWorksheetGenerator = createWorksheetGenerator;
-}
+        
+        function printWorksheet() {
+            if (!currentWorksheet) {
+                showStatus('❌ Generate a worksheet first!', 'error');
+                return;
+            }
+            
+            window.print();
+        }
+        
+        // Event listeners
+        document.getElementById('level').addEventListener('change', updateLevelInfo);
+        
+        // Initialize
+        window.addEventListener('load', function() {
+            updateLevelInfo(); // Set initial level info
+            
+            if (typeof generateFallbackProblems !== 'undefined' && typeof createWorksheetGenerator !== 'undefined') {
+                showStatus('🎉 Plugin loaded successfully! All 32 levels available.', 'success');
+                // Generate initial worksheet
+                setTimeout(generateWorksheet, 1000);
+            } else {
+                showStatus('❌ Plugin failed to load. Check file paths.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
