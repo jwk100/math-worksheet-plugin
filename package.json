@@ -1,0 +1,34 @@
+{
+  "name": "math-worksheet-plugin",
+  "version": "1.0.0",
+  "description": "Drop-in math worksheet generator for existing chat/PDF websites",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"Build script here\"",
+    "demo": "python -m http.server 8000"
+  },
+  "keywords": [
+    "math",
+    "worksheet",
+    "education",
+    "pdf",
+    "chat",
+    "plugin",
+    "kumon"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR-USERNAME/math-worksheet-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR-USERNAME/math-worksheet-plugin.git/issues"
+  },
+  "homepage": "https://github.com/YOUR-USERNAME/math-worksheet-plugin#readme",
+  "dependencies": {},
+  "peerDependencies": {
+    "html2pdf.js": "^0.10.1"
+  }
+}
