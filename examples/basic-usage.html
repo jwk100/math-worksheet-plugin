@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Worksheet Plugin Demo</title>
+    
+    <!-- Load the plugin -->
+    <script src="../src/core/fallback-generator.js"></script>
+    <script src="../src/integrations/plugin-interface.js"></script>
+    
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .controls { background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .controls > * { margin: 10px 0; }
+        select, input, button { padding: 8px; margin: 5px; }
+        button { background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005fa3; }
+        #output { border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🧮 Math Worksheet Generator Demo</h1>
+    
+    <div class="controls">
+        <h3>Generate Worksheet</h3>
+        <div>
+            <label>Level: 
+                <select id="level">
+                    <option value="1">Level 1: Counting to 10</option>
+                    <option value="11" selected>Level 11: Adding Within 10</option>
+                    <option value="15">Level 15: Adding Within 20</option>
+                    <option value="21">Level 21: Addition with Regrouping</option>
+                </select>
+            </label>
+        </div>
+        <div>
+            <label>Number of Problems: 
+                <input type="number" id="count" value="10" min="1" max="50">
+            </label>
+        </div>
+        <div>
+            <button onclick="generateWorksheet()">Generate Worksheet</button>
+            <button onclick="downloadPDF()">Download as PDF</button>
+        </div>
+    </div>
+    
+    <div id="output">
+        <p>Click "Generate Worksheet" to see your math problems!</p>
+    </div>
+
+    <script>
+        let currentWorksheet = null;
+        
+        function generateWorksheet() {
+            const level = parseInt(document.getElementById('level').value);
+            const count = parseInt(document.getElementById('count').value);
+            
+            // Create generator
+            const generator = createWorksheetGenerator();
+            
+            // Generate worksheet
+            generator.generate(level, count).then(result => {
+                currentWorksheet = result;
+                document.getElementById('output').innerHTML = result.html;
+            });
+        }
+        
+        function downloadPDF() {
+            if (!currentWorksheet) {
+                alert('Generate a worksheet first!');
+                return;
+            }
+            
+            // For a real implementation, you'd use html2pdf.js here
+            alert('PDF download would happen here!\n\nTo implement:\n1. Include html2pdf.js\n2. Call html2pdf().from(element).save()');
+        }
+        
+        // Generate initial worksheet
+        generateWorksheet();
+    </script>
+</body>
+</html>
