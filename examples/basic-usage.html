@@ -200,47 +200,22 @@
         
         // Complete level information for all 32 levels
         const LEVEL_INFO = {
-            // PreK (Ages 3-4)
-            1: { grade: "PreK", age: "3-4", problems: 5, description: "Visual counting with objects" },
-            2: { grade: "PreK", age: "3-4", problems: 5, description: "Number identification" },
-            
-            // Kindergarten (Ages 5-6)
-            3: { grade: "Kindergarten", age: "5-6", problems: 6, description: "Extended counting practice" },
-            4: { grade: "Kindergarten", age: "5-6", problems: 6, description: "Number recognition and ordering" },
-            5: { grade: "Kindergarten", age: "5-6", problems: 6, description: "Pattern completion" },
-            6: { grade: "Kindergarten", age: "5-6", problems: 8, description: "Shape identification" },
-            7: { grade: "Kindergarten", age: "5-6", problems: 8, description: "Higher number counting" },
-            8: { grade: "Kindergarten", age: "5-6", problems: 8, description: "Two-digit recognition" },
-            9: { grade: "Kindergarten", age: "5-6", problems: 8, description: "Introduction to addition" },
-            10: { grade: "Kindergarten", age: "5-6", problems: 8, description: "Introduction to subtraction" },
-            
-            // 1st Grade (Ages 6-7)
-            11: { grade: "1st Grade", age: "6-7", problems: 20, description: "Addition fluency building" },
-            12: { grade: "1st Grade", age: "6-7", problems: 20, description: "Subtraction fluency building" },
-            13: { grade: "1st Grade", age: "6-7", problems: 15, description: "Counting patterns to 100" },
-            14: { grade: "1st Grade", age: "6-7", problems: 15, description: "Place value concepts" },
-            15: { grade: "1st Grade", age: "6-7", problems: 20, description: "Two-digit addition basics" },
-            16: { grade: "1st Grade", age: "6-7", problems: 20, description: "Two-digit subtraction basics" },
-            17: { grade: "1st Grade", age: "6-7", problems: 20, description: "Expanded addition practice" },
-            18: { grade: "1st Grade", age: "6-7", problems: 20, description: "Expanded subtraction practice" },
-            19: { grade: "1st Grade", age: "6-7", problems: 15, description: "Even number patterns" },
-            20: { grade: "1st Grade", age: "6-7", problems: 15, description: "Multiplication foundation" },
-            
-            // 2nd Grade (Ages 7-8)
-            21: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Addition with carrying" },
-            22: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Subtraction with borrowing" },
-            23: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Advanced addition with regrouping" },
-            24: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Advanced subtraction with regrouping" },
-            25: { grade: "2nd Grade", age: "7-8", problems: 20, description: "Counting by tens" },
-            26: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Times tables for 2" },
-            27: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Times tables for 5" },
-            28: { grade: "2nd Grade", age: "7-8", problems: 25, description: "Times tables for 10" },
-            
-            // 3rd Grade (Ages 8-9)
-            29: { grade: "3rd Grade", age: "8-9", problems: 20, description: "Three-digit addition basics" },
-            30: { grade: "3rd Grade", age: "8-9", problems: 20, description: "Three-digit subtraction basics" },
-            31: { grade: "3rd Grade", age: "8-9", problems: 25, description: "Complex three-digit addition" },
-            32: { grade: "3rd Grade", age: "8-9", problems: 25, description: "Complex three-digit subtraction" }
+            1: { grade: "PreK", age: "3-4", problems: 5 }, 2: { grade: "PreK", age: "3-4", problems: 5 },
+            3: { grade: "Kindergarten", age: "5-6", problems: 6 }, 4: { grade: "Kindergarten", age: "5-6", problems: 6 },
+            5: { grade: "Kindergarten", age: "5-6", problems: 6 }, 6: { grade: "Kindergarten", age: "5-6", problems: 8 },
+            7: { grade: "Kindergarten", age: "5-6", problems: 8 }, 8: { grade: "Kindergarten", age: "5-6", problems: 8 },
+            9: { grade: "Kindergarten", age: "5-6", problems: 8 }, 10: { grade: "Kindergarten", age: "5-6", problems: 8 },
+            11: { grade: "1st Grade", age: "6-7", problems: 20 }, 12: { grade: "1st Grade", age: "6-7", problems: 20 },
+            13: { grade: "1st Grade", age: "6-7", problems: 15 }, 14: { grade: "1st Grade", age: "6-7", problems: 15 },
+            15: { grade: "1st Grade", age: "6-7", problems: 20 }, 16: { grade: "1st Grade", age: "6-7", problems: 20 },
+            17: { grade: "1st Grade", age: "6-7", problems: 20 }, 18: { grade: "1st Grade", age: "6-7", problems: 20 },
+            19: { grade: "1st Grade", age: "6-7", problems: 15 }, 20: { grade: "1st Grade", age: "6-7", problems: 15 },
+            21: { grade: "2nd Grade", age: "7-8", problems: 25 }, 22: { grade: "2nd Grade", age: "7-8", problems: 25 },
+            23: { grade: "2nd Grade", age: "7-8", problems: 25 }, 24: { grade: "2nd Grade", age: "7-8", problems: 25 },
+            25: { grade: "2nd Grade", age: "7-8", problems: 20 }, 26: { grade: "2nd Grade", age: "7-8", problems: 25 },
+            27: { grade: "2nd Grade", age: "7-8", problems: 25 }, 28: { grade: "2nd Grade", age: "7-8", problems: 25 },
+            29: { grade: "3rd Grade", age: "8-9", problems: 20 }, 30: { grade: "3rd Grade", age: "8-9", problems: 20 },
+            31: { grade: "3rd Grade", age: "8-9", problems: 25 }, 32: { grade: "3rd Grade", age: "8-9", problems: 25 }
         };
         
         function updateLevelInfo() {
@@ -252,8 +227,6 @@
                 document.getElementById('gradeInfo').textContent = info.grade;
                 document.getElementById('ageInfo').textContent = info.age;
                 document.getElementById('problemInfo').textContent = info.problems;
-                
-                // Update problem count to default for this level
                 document.getElementById('count').value = info.problems;
             }
         }
@@ -261,9 +234,7 @@
         function showStatus(message, type = 'success') {
             const statusDiv = document.getElementById('status');
             statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
-            setTimeout(() => {
-                statusDiv.innerHTML = '';
-            }, 3000);
+            setTimeout(() => statusDiv.innerHTML = '', 3000);
         }
         
         function generateWorksheet() {
@@ -282,7 +253,6 @@
                     currentWorksheet = result;
                     document.getElementById('output').innerHTML = result.html;
                     
-                    // Enable PDF and print buttons
                     document.getElementById('pdfBtn').disabled = false;
                     document.getElementById('printBtn').disabled = false;
                     
@@ -304,7 +274,6 @@
                 showStatus('❌ Generate a worksheet first!', 'error');
                 return;
             }
-            
             showStatus('💡 To download PDF: Right-click → Print → Save as PDF', 'success');
         }
         
@@ -313,7 +282,6 @@
                 showStatus('❌ Generate a worksheet first!', 'error');
                 return;
             }
-            
             window.print();
         }
         
@@ -322,11 +290,10 @@
         
         // Initialize
         window.addEventListener('load', function() {
-            updateLevelInfo(); // Set initial level info
+            updateLevelInfo();
             
             if (typeof generateFallbackProblems !== 'undefined' && typeof createWorksheetGenerator !== 'undefined') {
                 showStatus('🎉 Plugin loaded successfully! All 32 levels available.', 'success');
-                // Generate initial worksheet
                 setTimeout(generateWorksheet, 1000);
             } else {
                 showStatus('❌ Plugin failed to load. Check file paths.', 'error');
