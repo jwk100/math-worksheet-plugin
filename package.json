@@ -5,12 +5,11 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "echo \"Build script here\"",
     "demo": "python -m http.server 8000"
   },
   "keywords": [
     "math",
-    "worksheet",
+    "worksheet", 
     "education",
     "pdf",
     "chat",
@@ -23,10 +22,6 @@
     "type": "git",
     "url": "https://github.com/YOUR-USERNAME/math-worksheet-plugin.git"
   },
-  "bugs": {
-    "url": "https://github.com/YOUR-USERNAME/math-worksheet-plugin.git/issues"
-  },
-  "homepage": "https://github.com/YOUR-USERNAME/math-worksheet-plugin#readme",
   "dependencies": {},
   "peerDependencies": {
     "html2pdf.js": "^0.10.1"
