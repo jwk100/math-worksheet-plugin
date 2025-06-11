@@ -1,13 +1,19 @@
 /**
  * Main Plugin Interface for Easy Integration
- * USE THIS VERSION - It's the complete, better implementation
+ * FIXED VERSION - Works in browser and Node.js
  */
 
-// Import the fallback generator
-const { generateFallbackProblems, getSkillIdFromLevel } = 
-  typeof require !== 'undefined' 
-    ? require('../core/fallback-generator.js')
-    : window;
+// Import fallback generator (works in both environments)
+let generateFallbackProblems, getSkillIdFromLevel;
+
+if (typeof require !== 'undefined') {
+  // Node.js environment
+  ({ generateFallbackProblems, getSkillIdFromLevel } = require('../core/fallback-generator.js'));
+} else {
+  // Browser environment - functions should be on window
+  generateFallbackProblems = window.generateFallbackProblems;
+  getSkillIdFromLevel = window.getSkillIdFromLevel;
+}
 
 class MathWorksheetPlugin {
   constructor(options = {}) {
@@ -55,7 +61,8 @@ class MathWorksheetPlugin {
         font-family: Arial, sans-serif;
         max-width: 8.5in;
         margin: 0 auto;
-        padding: ${config.pageMargin}px;
+        padding: 40px;
+        background: white;
       ">
         <div class="header" style="
           text-align: center;
@@ -74,7 +81,7 @@ class MathWorksheetPlugin {
         <div class="problems-grid" style="
           display: grid;
           grid-template-columns: repeat(${config.columns}, 1fr);
-          gap: ${config.problemSpacing}px;
+          gap: 20px;
           margin-bottom: 40px;
         ">
           ${problemsHTML}
@@ -85,21 +92,23 @@ class MathWorksheetPlugin {
         .problem {
           font-size: ${config.fontSize}px;
           line-height: 1.6;
-          padding: 10px;
+          padding: 15px;
           border: 1px solid #eee;
-          border-radius: 4px;
+          border-radius: 8px;
           background: #fafafa;
-          min-height: ${config.fontSize * 2}px;
+          min-height: 60px;
         }
-        
         .problem-number {
           font-weight: bold;
           margin-right: 8px;
+          color: #007acc;
         }
-        
+        .problem-text {
+          font-family: monospace;
+        }
         @media print {
           @page { margin: 0.5in; }
-          .worksheet { padding: 0; }
+          .worksheet { padding: 20px; }
         }
       </style>
     `;
@@ -107,13 +116,13 @@ class MathWorksheetPlugin {
 
   getSkillName(level) {
     const skills = {
-      1: "Counting to 10", 
+      1: "Counting to 10",
       2: "Number Recognition 1-10", 
       3: "Counting to 20",
-      9: "Adding Within 5", 
-      11: "Adding Within 10", 
+      9: "Adding Within 5",
+      11: "Adding Within 10",
       15: "Adding Within 20",
-      21: "Adding With Regrouping", 
+      21: "Adding With Regrouping",
       26: "Multiplication 2s"
     };
     return skills[level] || `Level ${level} Math`;
@@ -126,14 +135,11 @@ class MathWorksheetPlugin {
   getLayoutConfig(level) {
     return {
       fontSize: level <= 10 ? 20 : level <= 20 ? 18 : 16,
-      columns: level <= 10 ? 2 : level <= 20 ? 4 : 5,
-      pageMargin: level <= 10 ? 40 : 30,
-      problemSpacing: level <= 10 ? 25 : 15
+      columns: level <= 10 ? 2 : level <= 20 ? 4 : 5
     };
   }
 }
 
-// Simple wrapper for easy use
 function createWorksheetGenerator(options = {}) {
   const plugin = new MathWorksheetPlugin(options);
   
@@ -151,7 +157,7 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = { MathWorksheetPlugin, createWorksheetGenerator };
 }
 
-// Export for browser
+// Export for browser (IMPORTANT!)
 if (typeof window !== 'undefined') {
   window.MathWorksheetPlugin = MathWorksheetPlugin;
   window.createWorksheetGenerator = createWorksheetGenerator;
